@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS users
+(
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(20) NOT NULL UNIQUE,
+    password VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS messages
+(
+    id BIGSERIAL PRIMARY KEY,
+    author VARCHAR(20),
+    text TEXT,
+    date TIMESTAMP with time zone DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,0 +1,10 @@
+edu/school21/logic/renderer/Renderer.class
+edu/school21/logic/printer/Printer.class
+edu/school21/logic/renderer/RendererStandardImpl.class
+edu/school21/logic/printer/PrinterWithDateTimeImpl.class
+edu/school21/logic/printer/PrinterWithPrefixImpl.class
+edu/school21/logic/preprocessor/PreProcessor.class
+edu/school21/app/Program.class
+edu/school21/logic/preprocessor/PreProcessorToUpperImpl.class
+edu/school21/logic/preprocessor/PreProcessorToLowerImpl.class
+edu/school21/logic/renderer/RendererErrImpl.class

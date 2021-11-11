@@ -1,0 +1,240 @@
+package edu.school21.game;
+
+import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
+import static com.diogonunes.jcolor.Ansi.*;
+import static com.diogonunes.jcolor.Attribute.*;
+
+public class Game {
+	public static final int ENEMY = 0;
+	public static final int PLAYER = 1;
+	public static final int WALL = 2;
+	public static final int PORTAL = 3;
+	public static final int EMPTY = 4;
+
+	public static final int UPWARD = 0;
+	public static final int DOWNWARD = 1;
+	public static final int LEFT = 2;
+	public static final int RIGHT = 3;
+
+	private int[][] gameMap;
+	private int playerPos;
+	private int portalPos;
+	private int mode;
+	private final GameMapData gameMapData;
+
+	public Game(int enemiesCount, int wallsCount, int size, String profile) {
+		gameMapData = new GameMapData(enemiesCount, wallsCount, size);
+		gameMap = new int[size][size];
+		for (int[] row: gameMap)
+			Arrays.fill(row, EMPTY);
+		if (profile.equals("dev"))
+			mode = 1;
+		else 
+			mode = 0;
+	}
+
+	public int getMode() {
+		return mode;
+	}
+
+	public int[][] getGameMap() {
+		return gameMap;
+	}
+
+	public GameMapData getGameMapData() {
+		return gameMapData;
+	}
+
+	public void setGameMap(int[][] gameMap) {
+		this.gameMap = gameMap;
+	}
+
+	public void movePlayer(int direction) {
+		switch (direction) {
+			case UPWARD:
+				playerPos -= gameMapData.getSize();
+				break;
+			case DOWNWARD:
+				playerPos += gameMapData.getSize();
+				break;
+			case LEFT:
+				playerPos--;
+				break;
+			case RIGHT:
+				playerPos++;
+				break;
+		}
+	}
+
+	public void moveItem(int[] curPos, int[] newPos) {
+		gameMap[newPos[0]][newPos[1]] = gameMap[curPos[0]][curPos[1]];
+		gameMap[curPos[0]][curPos[1]] = EMPTY;
+	}
+
+	public int[] getUnitPos(int unitType) {
+		if (unitType == PLAYER) {
+			return convertLinedCoordsToPlaneOnes(playerPos);
+		} else if (unitType == PORTAL) {
+			return convertLinedCoordsToPlaneOnes(portalPos);
+		} else {
+			return (new int[]{-1, -1});
+		}
+	}
+
+	public void generateGameMap() {
+		int[] linedGameMap = new int[gameMapData.size * gameMapData.size];
+		Arrays.fill(linedGameMap, EMPTY);
+
+		putUnits(linedGameMap, WALL);
+		putUnits(linedGameMap, ENEMY);
+		putUnits(linedGameMap, PORTAL);
+		putUnits(linedGameMap, PLAYER);
+		convertLinedMapToUsualMap(linedGameMap);
+	}
+
+	private void convertLinedMapToUsualMap(int[] linedGameMap) {
+		for (int i = 0; i < linedGameMap.length; i++) {
+			gameMap[i / gameMapData.size][i % gameMapData.size] = linedGameMap[i];
+		}
+	}
+
+	private int[] convertLinedCoordsToPlaneOnes(int currCell) {
+		return (new int[]{currCell / gameMapData.size, currCell % gameMapData.size});
+	}
+	private void putUnits(int[] linedGameMap, int unitType) {
+		int unitAmount;
+
+		switch (unitType) {
+			case PLAYER:
+			case PORTAL:
+				unitAmount = 1;
+				break;
+			case WALL:
+				unitAmount = gameMapData.getWallsCount();
+				break;
+			case ENEMY:
+				unitAmount = gameMapData.getEnemiesCount();
+				break;
+			default:
+				unitAmount = 0;
+		}
+
+		for (int i = 0; i < unitAmount; i++) {
+
+			int currCell;
+			do {
+				currCell = ThreadLocalRandom.current().nextInt(0, linedGameMap.length);
+			} while (linedGameMap[currCell] != EMPTY);
+
+			linedGameMap[currCell] = unitType;
+
+			if (unitType == PLAYER) {
+				playerPos = currCell;
+			} else if (unitType == PORTAL) {
+				portalPos = currCell;
+			}
+		}
+
+	}
+
+	public void printGameMap() {
+		for (int y = 0; y < gameMapData.getSize(); y++) {
+			for (int x = 0; x < gameMapData.getSize(); x++) {
+				drow(getUnitColor(gameMap[y][x]), String.valueOf(getUnitChar(gameMap[y][x])));
+			}
+			System.out.println("");
+		}
+	}
+
+	private static void drow(String color, String currUnitAsString) {
+		switch (color) {
+			case "RED":
+				System.out.print(colorize(currUnitAsString, NONE(), RED_BACK()));
+				break;
+			case "GREEN":
+				System.out.print(colorize(currUnitAsString, NONE(), GREEN_BACK()));
+				break;
+			case "YELLOW":
+				System.out.print(colorize(currUnitAsString, NONE(), YELLOW_BACK()));
+				break;
+			case "BLUE":
+				System.out.print(colorize(currUnitAsString, NONE(), BLUE_BACK()));
+				break;
+			case "MAGENTA":
+				System.out.print(colorize(currUnitAsString, NONE(), MAGENTA_BACK()));
+				break;
+			case "CYAN":
+				System.out.print(colorize(currUnitAsString, NONE(), CYAN_BACK()));
+				break;
+			case "WHITE":
+				System.out.print(colorize(currUnitAsString, NONE(), WHITE_BACK()));
+				break;
+			default:
+				System.out.print(colorize(currUnitAsString, NONE(), BLACK_BACK()));
+		}
+	}
+
+	private String getUnitColor(int unitType) {
+		switch (unitType) {
+			case ENEMY:
+				return OutputData.getEnemyColor();
+			case PLAYER:
+				return OutputData.getPlayerColor();
+			case WALL:
+				return OutputData.getWallColor();
+			case PORTAL:
+				return OutputData.getPortalColor();
+			case EMPTY:
+				return OutputData.getEmptyColor();
+			default:
+				return "";
+		}
+	}
+
+	private char getUnitChar(int unitType) {
+		switch (unitType) {
+			case ENEMY:
+				return OutputData.getEnemyChar();
+			case PLAYER:
+				return OutputData.getPlayerChar();
+			case WALL:
+				return OutputData.getWallChar();
+			case PORTAL:
+				return OutputData.getPortalChar();
+			case EMPTY:
+				return OutputData.getEmptyChar();
+			default:
+				return ' ';
+		}
+	}
+
+	public static boolean checkValid(int enemiesCount, int wallsCount, int size) {
+		return ((enemiesCount + wallsCount + 2) <= (size * size));
+	}
+
+	private static class GameMapData {
+		private final int enemiesCount;
+		private final int wallsCount;
+		private final int size;
+
+		GameMapData(int enemiesCount, int wallsCount, int size) {
+			this.enemiesCount = enemiesCount;
+			this.wallsCount = wallsCount;
+			this.size = size;
+		}
+
+		public int getEnemiesCount() {
+			return enemiesCount;
+		}
+
+		public int getWallsCount() {
+			return wallsCount;
+		}
+
+		public int getSize() {
+			return size;
+		}
+	}
+
+}

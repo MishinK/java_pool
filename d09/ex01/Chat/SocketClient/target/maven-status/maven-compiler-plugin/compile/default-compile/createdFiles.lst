@@ -1,0 +1,4 @@
+edu/school21/sockets/app/Main.class
+edu/school21/sockets/chat/Chat.class
+edu/school21/sockets/chat/Chat$ChatReader.class
+edu/school21/sockets/chat/Chat$ChatWriter.class
